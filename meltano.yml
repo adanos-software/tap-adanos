@@ -1,0 +1,63 @@
+send_anonymous_usage_stats: true
+project_id: tap-adanos
+default_environment: test
+requires_meltano: ">=4.0"
+environments:
+  - name: test
+plugins:
+  extractors:
+    - name: tap-adanos
+      namespace: tap_adanos
+      pip_url: -e .
+      capabilities:
+        - catalog
+        - discover
+        - about
+        - stream-maps
+        - schema-flattening
+        - batch
+        - structured-logging
+      settings:
+        - name: api_key
+          kind: password
+          label: API Key
+          description: Adanos API key from https://adanos.org/register.
+          sensitive: true
+        - name: asset_type
+          kind: options
+          options:
+            - label: Stock
+              value: stock
+            - label: Crypto
+              value: crypto
+          value: stock
+        - name: stock_source
+          kind: options
+          options:
+            - label: Reddit
+              value: reddit
+            - label: X / FinTwit
+              value: x
+            - label: News
+              value: news
+            - label: Polymarket
+              value: polymarket
+          value: reddit
+        - name: symbols
+          kind: array
+        - name: start_date
+          kind: date_iso8601
+        - name: end_date
+          kind: date_iso8601
+        - name: page_size
+          kind: integer
+          value: 100
+        - name: base_url
+          kind: string
+          value: https://api.adanos.org
+      settings_group_validation:
+        - [api_key, symbols, start_date]
+  loaders:
+    - name: target-jsonl
+      variant: andyh1203
+      pip_url: target-jsonl
